@@ -21,3 +21,16 @@ fixtures/
 **/fixtures/
 *_fixture.json
 
+# Database and docker data
+data/
+pg_db/
+backup/
+
+# Python caches and build
+*.pyc
+__pycache__/
+*.egg-info/
+.pytest_cache/
+scratch/wiki_cache/
+
+roadmap.md

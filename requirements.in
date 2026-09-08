@@ -9,6 +9,7 @@ django-rest-passwordreset
 
 # GraphQL
 graphene-django
+strawberry-graphql[django]
 
 # Forms and utilities
 django-crispy-forms
@@ -38,8 +39,9 @@ django[gis]       # enables GeoDjango (requires system libs: GDAL/GEOS)
 psycopg2-binary ; python_version < "3.14"
 psycopg[binary] ; python_version >= "3.14"
 
-# WSGI server for production
+# Web servers (WSGI & ASGI)
 gunicorn
+uvicorn[standard]
 
 # Env handling
 python-dotenv

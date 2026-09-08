@@ -38,10 +38,24 @@ router.register('assemblypersondisplay', views.AssemblypersonalViewSet,basename=
 
 from drf_spectacular.views import SpectacularAPIView
 from drf_spectacular.views import SpectacularRedocView, SpectacularSwaggerView
+try:
+    from strawberry.django.views import AsyncGraphQLView
+    from .async_schema import async_schema
+    HAS_STRAWBERRY = True
+except ImportError:
+    HAS_STRAWBERRY = False
+    AsyncGraphQLView = None
+    async_schema = None
+
 urlpatterns = [
-path('admin/', admin.site.urls),
-path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
+    path('admin/', admin.site.urls),
+    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
 ]
+
+if HAS_STRAWBERRY and AsyncGraphQLView and async_schema:
+    urlpatterns.append(
+        path("graphql/async/", csrf_exempt(AsyncGraphQLView.as_view(schema=async_schema)))
+    )
 '''
 urlpatterns = [
 path('executive_leaders/',include('executive_leaders.urls')),
