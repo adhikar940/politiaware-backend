@@ -18,6 +18,10 @@ class ReligionEnum(Enum):
     CHRISTIAN = "Christian"
     BUDDHIST = "Buddhist"
 
+class ReservationCategoryEnum(Enum):
+    GEN = "GEN"
+    SC = "SC"
+    ST = "ST"
 
 def enum_to_choices(enum_cls):
     # Helper to convert enum to Django choices

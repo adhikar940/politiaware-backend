@@ -12,7 +12,7 @@ from django.db import models
 from .model_loader import get_django_model
 from .type_factory import get_or_create_strawberry_type, get_or_create_paginated_type
 from .filter_factory import get_or_create_model_filter_type
-from .db_operations import async_fetch_list
+from .async_db_operations import async_fetch_list
 
 
 def _format_query_name(model_name: str, prefix: str = "", suffix: str = "") -> str:

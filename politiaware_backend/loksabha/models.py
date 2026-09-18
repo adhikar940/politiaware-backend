@@ -3,10 +3,16 @@ from django.contrib.gis.db import models as geomodels
 from district.models import DistrictForeign
 from party.models import Party
 from person.models import person
+from person.enums import ReservationCategoryEnum, enum_to_choices
 from django.core.exceptions import ValidationError
 
 class LoksabhaConstituency(DistrictForeign):
     loksabhaConstituencyName = models.CharField(max_length=100)
+    reservationCategory = models.CharField(
+        max_length=10,
+        choices=enum_to_choices(ReservationCategoryEnum),
+        default=ReservationCategoryEnum.GEN.value,
+    )
     isExist = models.BooleanField(default=True, null=True, blank=True)
     class Meta:
         constraints = [

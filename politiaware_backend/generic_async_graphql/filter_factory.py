@@ -5,28 +5,15 @@ Builds typed GraphQL filter inputs for primitive scalars and nested relationship
 
 from typing import Any, Dict, List, Optional, Type
 import datetime
-
-try:
-    import strawberry
-    HAS_STRAWBERRY = True
-    STRAWBERRY_ID = strawberry.ID
-    _strawberry_input_dec = strawberry.input
-    _strawberry_field = strawberry.field
-except ImportError:
-    strawberry = None
-    HAS_STRAWBERRY = False
-    STRAWBERRY_ID = str
-    _strawberry_input_dec = lambda c, *args, **kwargs: c
-    _strawberry_field = lambda *args, **kwargs: kwargs.get("default", None)
-
+import strawberry
 from django.db import models
 
-from politiaware_backend.generic_async_graphql.model_loader import get_field_by_name, get_model_fields
+from .model_loader import get_field_by_name, get_model_fields
 
 _FILTER_TYPE_REGISTRY: Dict[str, Any] = {}
 
 
-@_strawberry_input_dec(description="String field filter operators")
+@strawberry.input(description="String field filter operators")
 class StringFilterInput:
     exact: Optional[str] = None
     iexact: Optional[str] = None
@@ -34,34 +21,34 @@ class StringFilterInput:
     icontains: Optional[str] = None
     startswith: Optional[str] = None
     endswith: Optional[str] = None
-    in_: Optional[List[str]] = _strawberry_field(default=None, name="in")
+    in_: Optional[List[str]] = strawberry.field(default=None, name="in")
     isnull: Optional[bool] = None
 
 
-@_strawberry_input_dec(description="Integer field filter operators")
+@strawberry.input(description="Integer field filter operators")
 class IntFilterInput:
     exact: Optional[int] = None
     gt: Optional[int] = None
     gte: Optional[int] = None
     lt: Optional[int] = None
     lte: Optional[int] = None
-    in_: Optional[List[int]] = _strawberry_field(default=None, name="in")
+    in_: Optional[List[int]] = strawberry.field(default=None, name="in")
     range: Optional[List[int]] = None
     isnull: Optional[bool] = None
 
 
-@_strawberry_input_dec(description="ID field filter operators")
+@strawberry.input(description="ID field filter operators")
 class IdFilterInput:
-    exact: Optional[STRAWBERRY_ID] = None
-    in_: Optional[List[STRAWBERRY_ID]] = _strawberry_field(default=None, name="in")
-    gt: Optional[STRAWBERRY_ID] = None
-    gte: Optional[STRAWBERRY_ID] = None
-    lt: Optional[STRAWBERRY_ID] = None
-    lte: Optional[STRAWBERRY_ID] = None
+    exact: Optional[strawberry.ID] = None
+    in_: Optional[List[strawberry.ID]] = strawberry.field(default=None, name="in")
+    gt: Optional[strawberry.ID] = None
+    gte: Optional[strawberry.ID] = None
+    lt: Optional[strawberry.ID] = None
+    lte: Optional[strawberry.ID] = None
     isnull: Optional[bool] = None
 
 
-@_strawberry_input_dec(description="Float / Decimal field filter operators")
+@strawberry.input(description="Float / Decimal field filter operators")
 class FloatFilterInput:
     exact: Optional[float] = None
     gt: Optional[float] = None
@@ -72,7 +59,7 @@ class FloatFilterInput:
     isnull: Optional[bool] = None
 
 
-@_strawberry_input_dec(description="Date field filter operators")
+@strawberry.input(description="Date field filter operators")
 class DateFilterInput:
     exact: Optional[datetime.date] = None
     gt: Optional[datetime.date] = None
@@ -86,7 +73,7 @@ class DateFilterInput:
     isnull: Optional[bool] = None
 
 
-@_strawberry_input_dec(description="DateTime field filter operators")
+@strawberry.input(description="DateTime field filter operators")
 class DateTimeFilterInput:
     exact: Optional[datetime.datetime] = None
     gt: Optional[datetime.datetime] = None
@@ -100,7 +87,7 @@ class DateTimeFilterInput:
     isnull: Optional[bool] = None
 
 
-@_strawberry_input_dec(description="Boolean field filter operators")
+@strawberry.input(description="Boolean field filter operators")
 class BooleanFilterInput:
     exact: Optional[bool] = None
     isnull: Optional[bool] = None
@@ -186,10 +173,11 @@ def get_or_create_model_filter_type(
     class_attrs["__annotations__"] = annotations
 
     dynamic_filter_cls = type(cache_key, (), class_attrs)
-    strawberry_decorated = _strawberry_input_dec(
+    strawberry_decorated = strawberry.input(
         dynamic_filter_cls,
         description=f"Top-down structured filters for {model_cls.__name__}"
     )
 
     _FILTER_TYPE_REGISTRY[cache_key] = strawberry_decorated
     return strawberry_decorated
+

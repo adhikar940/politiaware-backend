@@ -18,6 +18,15 @@ from .sync_db_operations import (
     assign_model_fields,
     get_clean_exclude_fields
 )
+from politiaware_backend.valkey_cache import (
+    is_cache_enabled,
+    build_list_cache_key,
+    aget_cached_list,
+    aset_cached_list,
+    ainvalidate_model
+)
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -149,6 +158,29 @@ async def async_fetch_list(
     Returns:
       {"total": int, "offset": int, "limit": int, "data": list}
     """
+    # 0. Check Valkey cache if enabled
+    cache_active = is_cache_enabled()
+    payload_key = None
+    meta_key = None
+    tracking_set_key = None
+    metadata = None
+
+    if cache_active:
+        select_paths = extract_relation_paths_from_info(model_cls, info) if info else None
+        payload_key, meta_key, tracking_set_key, metadata = build_list_cache_key(
+            model_cls=model_cls,
+            filters_data=filters_data,
+            search_term=search_term,
+            search_fields=search_fields,
+            order_by=order_by,
+            offset=offset,
+            limit=limit,
+            select_paths=select_paths,
+        )
+        cached_res = await aget_cached_list(payload_key)
+        if cached_res is not None:
+            return cached_res
+
     qs = model_cls.objects.all()
 
     # 1. Custom get_queryset hook if defined
@@ -187,12 +219,25 @@ async def async_fetch_list(
     sliced_qs = qs[offset:offset + limit]
     items = [item async for item in sliced_qs]
 
-    return {
+    result = {
         "total": total,
         "offset": offset,
         "limit": limit,
         "data": items,
     }
+
+    # 8. Store in Valkey cache if enabled
+    if cache_active and payload_key and meta_key and tracking_set_key and metadata:
+        await aset_cached_list(
+            payload_key=payload_key,
+            meta_key=meta_key,
+            tracking_set_key=tracking_set_key,
+            result_dict=result,
+            metadata=metadata,
+        )
+
+    return result
+
 
 
 async def async_get_record(
@@ -285,8 +330,9 @@ async def async_create_record(
 ) -> Tuple[Optional[models.Model], Optional[List[str]]]:
     """
     Asynchronously executes sync_create_record inside a thread-sensitive worker.
+    Invalidates Valkey cache for model_cls upon successful creation.
     """
-    return await sync_to_async(sync_create_record, thread_sensitive=True)(
+    inst, errs = await sync_to_async(sync_create_record, thread_sensitive=True)(
         model_cls=model_cls,
         input_data=input_data,
         create_cols=create_cols,
@@ -295,6 +341,9 @@ async def async_create_record(
         after_save=after_save,
         info=info
     )
+    if inst is not None and not errs and is_cache_enabled():
+        await ainvalidate_model(model_cls)
+    return inst, errs
 
 
 async def async_update_record(
@@ -309,8 +358,9 @@ async def async_update_record(
 ) -> Tuple[Optional[models.Model], Optional[List[str]]]:
     """
     Asynchronously executes sync_update_record inside a thread-sensitive worker.
+    Invalidates Valkey cache for model_cls upon successful update.
     """
-    return await sync_to_async(sync_update_record, thread_sensitive=True)(
+    inst, errs = await sync_to_async(sync_update_record, thread_sensitive=True)(
         model_cls=model_cls,
         pk_val=pk_val,
         input_data=input_data,
@@ -320,6 +370,9 @@ async def async_update_record(
         after_save=after_save,
         info=info
     )
+    if inst is not None and not errs and is_cache_enabled():
+        await ainvalidate_model(model_cls)
+    return inst, errs
 
 
 async def async_partial_update_record(
@@ -334,8 +387,9 @@ async def async_partial_update_record(
 ) -> Tuple[Optional[models.Model], Optional[List[str]]]:
     """
     Asynchronously executes sync_partial_update_record inside a thread-sensitive worker.
+    Invalidates Valkey cache for model_cls upon successful partial update.
     """
-    return await sync_to_async(sync_partial_update_record, thread_sensitive=True)(
+    inst, errs = await sync_to_async(sync_partial_update_record, thread_sensitive=True)(
         model_cls=model_cls,
         pk_val=pk_val,
         input_data=input_data,
@@ -345,6 +399,9 @@ async def async_partial_update_record(
         after_save=after_save,
         info=info
     )
+    if inst is not None and not errs and is_cache_enabled():
+        await ainvalidate_model(model_cls)
+    return inst, errs
 
 
 async def async_delete_record(
@@ -357,8 +414,9 @@ async def async_delete_record(
 ) -> Tuple[Optional[Any], bool, Optional[List[str]]]:
     """
     Asynchronously executes sync_delete_record inside a thread-sensitive worker.
+    Invalidates Valkey cache for model_cls upon successful deletion.
     """
-    return await sync_to_async(sync_delete_record, thread_sensitive=True)(
+    deleted_id, success, errs = await sync_to_async(sync_delete_record, thread_sensitive=True)(
         model_cls=model_cls,
         pk_val=pk_val,
         pk_field_name=pk_field_name,
@@ -366,4 +424,8 @@ async def async_delete_record(
         after_delete=after_delete,
         info=info
     )
+    if success and is_cache_enabled():
+        await ainvalidate_model(model_cls)
+    return deleted_id, success, errs
+
 

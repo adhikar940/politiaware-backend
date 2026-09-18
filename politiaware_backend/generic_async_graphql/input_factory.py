@@ -4,19 +4,11 @@ Builds typed input types for create and update mutations.
 """
 
 from typing import Any, Dict, List, Optional, Type
-try:
-    import strawberry
-    HAS_STRAWBERRY = True
-    _strawberry_input_dec = strawberry.input
-except ImportError:
-    strawberry = None
-    HAS_STRAWBERRY = False
-    _strawberry_input_dec = lambda c, *args, **kwargs: c
-
+import strawberry
 from django.db import models
 
-from politiaware_backend.generic_async_graphql.model_loader import get_model_fields, get_required_fields
-from politiaware_backend.generic_async_graphql.type_factory import django_field_to_python_type
+from .model_loader import get_model_fields, get_required_fields
+from .type_factory import django_field_to_python_type
 
 _INPUT_TYPE_REGISTRY: Dict[str, Any] = {}
 
@@ -59,10 +51,11 @@ def get_or_create_input_type(
     class_attrs["__annotations__"] = annotations
 
     dynamic_cls = type(name, (), class_attrs)
-    strawberry_decorated = _strawberry_input_dec(
+    strawberry_decorated = strawberry.input(
         dynamic_cls,
         description=f"Input arguments for {action_str.lower()} {model_cls.__name__}"
     )
 
     _INPUT_TYPE_REGISTRY[name] = strawberry_decorated
     return strawberry_decorated
+

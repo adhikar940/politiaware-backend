@@ -1,14 +1,22 @@
 """
 Asynchronous Strawberry GraphQL Schema for Politiaware Backend.
-Dynamically generated from generic_async_graphql and TOML / GRAPHQL_CONF.
+Dynamically generated from generic_async_graphql and GRAPHQL_CONF.
 """
 
-from politiaware_backend.generic_async_graphql import generate_generic_async_graphql
+from generic_async_graphql import generate_generic_async_graphql
+from graphql_conf.graphql_conf import GRAPHQL_CONF
 
+# Strawberry extensions for OpenTelemetry tracing
+extensions = []
 try:
-    from politiaware_backend.graphql_conf.graphql_conf import GRAPHQL_CONF
-except ImportError:
-    GRAPHQL_CONF = None
+    from politiaware_backend.observability import get_strawberry_otel_extension
+    otel_ext = get_strawberry_otel_extension()
+    if otel_ext:
+        extensions.append(otel_ext())
+except Exception:
+    pass
 
-# Build the compiled Strawberry async schema (loads models from .toml if GRAPHQL_CONF is None)
-async_schema = generate_generic_async_graphql(GRAPHQL_CONF)
+# Build the compiled Strawberry async schema
+async_schema = generate_generic_async_graphql(GRAPHQL_CONF, extensions=extensions)
+
+

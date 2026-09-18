@@ -194,7 +194,8 @@ def get_or_create_strawberry_type(
     strawberry_decorated = strawberry.type(dynamic_cls, description=f"Asynchronous GraphQL Type for {model_cls.__name__}")
 
     _STRAWBERRY_TYPE_REGISTRY[cache_key] = strawberry_decorated
-    _STRAWBERRY_TYPE_REGISTRY[base_name] = strawberry_decorated
+    if depth >= 2:
+        _STRAWBERRY_TYPE_REGISTRY[base_name] = strawberry_decorated
     return strawberry_decorated
 
 

@@ -8,8 +8,7 @@ drf-spectacular
 django-rest-passwordreset
 
 # GraphQL
-graphene-django
-strawberry-graphql[django]
+strawberry-graphql[django,opentelemetry]
 
 # Forms and utilities
 django-crispy-forms
@@ -53,6 +52,26 @@ pillow
 cloudinary 
 django-cloudinary-storage
 
-#toml
-
+# toml
 tomli>=2.3.0
+
+# In-Memory Cache (Official Valkey Client)
+valkey>=1.0.0
+
+# Observability & OpenTelemetry (Tracing, Metrics, Logging)
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-instrumentation
+opentelemetry-instrumentation-django
+opentelemetry-instrumentation-psycopg2 ; python_version < "3.14"
+opentelemetry-instrumentation-psycopg ; python_version >= "3.14"
+opentelemetry-instrumentation-redis
+opentelemetry-instrumentation-asgi
+opentelemetry-instrumentation-wsgi
+opentelemetry-instrumentation-requests
+opentelemetry-instrumentation-httpx
+opentelemetry-instrumentation-urllib
+opentelemetry-instrumentation-urllib3
+opentelemetry-instrumentation-logging

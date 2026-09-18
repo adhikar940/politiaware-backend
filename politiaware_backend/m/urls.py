@@ -13,49 +13,14 @@ from django.contrib.auth import views as auth_views
 #from n.views import ChangePasswordView
 from . router import router
 
-from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
-from . schema import schema 
-
-
-'''
-router = routers.DefaultRouter()
-router.register('users', views.UserViewSet)
-router.register('user1', views.User1ViewSet)
-router.register('party', views.PartyViewSet,basename='party')
-#router.register('stateparty', views.statePartyViewSet)
-router.register('lokperson', views.loksabhapersonalViewSet,basename='lok')
-router.register('rajperson', views.rajyasabhapersonalViewSet,basename='raj')
-router.register('rajpersonal', views.rajyasabhapersonal1ViewSet,basename='raj1')
-router.register('assemblyperson', views.assemblypersonalViewSet,basename='assembly')
-router.register('councilperson', views.councilpersonalViewSet,basename='council')
-router.register('rajpersondisplay', views.rajpersonalViewSet,basename='r')
-router.register('councilpersondisplay', views.CouncilpersonalViewSet,basename='c')
-router.register('lokpersondisplay', views.LoksabhapersonalViewSet,basename='l')
-router.register('assemblypersondisplay', views.AssemblypersonalViewSet,basename='a')
-#router.register('Ll', views.LlViewSet)
-#urlpatterns = router.urls'''
-
-from drf_spectacular.views import SpectacularAPIView
-from drf_spectacular.views import SpectacularRedocView, SpectacularSwaggerView
-try:
-    from strawberry.django.views import AsyncGraphQLView
-    from .async_schema import async_schema
-    HAS_STRAWBERRY = True
-except ImportError:
-    HAS_STRAWBERRY = False
-    AsyncGraphQLView = None
-    async_schema = None
+from strawberry.django.views import AsyncGraphQLView
+from .async_schema import async_schema
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
+    path("graphql/async/", csrf_exempt(AsyncGraphQLView.as_view(schema=async_schema))),
 ]
-
-if HAS_STRAWBERRY and AsyncGraphQLView and async_schema:
-    urlpatterns.append(
-        path("graphql/async/", csrf_exempt(AsyncGraphQLView.as_view(schema=async_schema)))
-    )
 '''
 urlpatterns = [
 path('executive_leaders/',include('executive_leaders.urls')),

@@ -14,3 +14,10 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'm.settings')
 
 application = get_wsgi_application()
+
+try:
+    from politiaware_backend.observability import wrap_wsgi_application
+    application = wrap_wsgi_application(application)
+except Exception:
+    pass
+

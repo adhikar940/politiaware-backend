@@ -20,9 +20,8 @@ An automated, config-driven **Asynchronous GraphQL Engine** for Django powered b
    - Automatically generates list queries (`allPartys`, `allStates`) with top-down nested filters, text search, multi-column ordering, and pagination.
    - Automatically generates full asynchronous CRUD mutations (`create`, `update`, `partialUpdate`, `delete`).
 
-4. **Coexists with Graphene**:
-   - Runs side-by-side with your existing Graphene endpoint at `/graphql/`.
-   - Accessible at `/graphql/async/` (e.g. `http://127.0.0.1:9000/graphql/async/`).
+4. **Sole Asynchronous GraphQL Endpoint**:
+   - Served via Strawberry's `AsyncGraphQLView` exclusively at `/graphql/async/` (e.g. `http://127.0.0.1:8000/graphql/async/`).
 
 ---
 
@@ -138,7 +137,7 @@ mutation {
 
 ## ⚙️ Configuration (`graphql_conf.py`)
 
-The engine consumes the exact same configuration as `generic_graphql`:
+The engine consumes the centralized configuration from `graphql_conf.py`:
 
 ```python
 GRAPHQL_CONF = {

@@ -14,3 +14,10 @@ from django.core.asgi import get_asgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'm.settings')
 
 application = get_asgi_application()
+
+try:
+    from politiaware_backend.observability import wrap_asgi_application
+    application = wrap_asgi_application(application)
+except Exception:
+    pass
+

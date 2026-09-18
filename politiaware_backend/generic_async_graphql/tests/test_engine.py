@@ -199,6 +199,24 @@ async def run_async_tests():
     # Clean up GraphQL created party using sync_to_async
     await sync_to_async(lambda: Party.objects.filter(pk=gql_party_id).delete(), thread_sensitive=True)()
 
+    print("\n--- 6. Testing Enum Query via Strawberry ---")
+    assert "casteCategories" in query_fields, "Missing casteCategories in query fields"
+    assert "genders" in query_fields, "Missing genders in query fields"
+    assert "religions" in query_fields, "Missing religions in query fields"
+    enum_query = """
+    query TestEnums {
+        casteCategories
+        genders
+        religions
+    }
+    """
+    enum_res = await async_schema.execute(enum_query)
+    assert enum_res.errors is None, f"Enum query errors: {enum_res.errors}"
+    assert "OBC" in enum_res.data["casteCategories"]
+    assert "Male" in enum_res.data["genders"]
+    assert "Hindu" in enum_res.data["religions"]
+    print("✅ Enum query (casteCategories, genders, religions) resolved successfully!")
+
     print("\n🎉 ALL ASYNC & SYNC DATABASE OPERATION TESTS PASSED!")
 
 

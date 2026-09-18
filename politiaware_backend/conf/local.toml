@@ -36,3 +36,25 @@ media_root = "media"
 # Example: ALLOWED_HOSTS="example.com,.example.org"
 allowed_hosts = "env:ALLOWED_HOSTS"
 
+[valkey]
+enabled = "env:ENABLE_VALKEY_CACHE"
+url = "env:VALKEY_URL"
+default_timeout = "env:VALKEY_CACHE_TTL"
+prefix = "env:VALKEY_PREFIX"
+
+[observability]
+enabled = "env:OTEL_ENABLED"
+service_name = "env:OTEL_SERVICE_NAME"
+jaeger_enabled = "env:JAEGER_ENABLED"
+jaeger_endpoint = "env:JAEGER_ENDPOINT"
+arize_enabled = "env:ARIZE_ENABLED"
+arize_endpoint = "env:ARIZE_ENDPOINT"
+arize_space_id = "env:ARIZE_SPACE_ID"
+arize_api_key = "env:ARIZE_API_KEY"
+sampler = "env:OTEL_TRACES_SAMPLER"
+opensearch_url = "env:OPENSEARCH_URL"
+opensearch_logging_enabled = "env:OPENSEARCH_LOGGING_ENABLED"
+opensearch_index_prefix = "env:OPENSEARCH_INDEX_PREFIX"
+
+
+

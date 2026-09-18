@@ -6,7 +6,7 @@ import importlib
 from typing import Any, Dict, List, Optional, Type
 from django.db import models
 
-from politiaware_backend.generic_async_graphql.model_loader import get_editable_fields, get_model_fields
+from .model_loader import get_editable_fields, get_model_fields
 
 
 def resolve_callable(func_or_path: Any) -> Any:
@@ -200,3 +200,4 @@ def normalize_model_config(
         "queries": queries_cfg,
         "mutations": mutations_cfg,
     }
+

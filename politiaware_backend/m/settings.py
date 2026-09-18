@@ -66,7 +66,6 @@ INSTALLED_APPS = [
      'debug_toolbar',
      'drf_spectacular', 
      'person',
-     "graphene_django",    
      'dbbackup',  
      'django.contrib.gis',
      'state',
@@ -81,10 +80,6 @@ INSTALLED_APPS = [
      'session_info',
 ]
 
-GRAPHENE = {
-    "SCHEMA": "django_root.schema.schema"
-}
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
@@ -93,6 +88,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    'politiaware_backend.observability.ObservabilityMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -201,7 +197,83 @@ DEFAULT_THROTTLE_RATES = {
 
 
 
+# Valkey Cache Configuration (Official valkey-py)
+valkey_conf = config.get("valkey") or {}
+
+def _to_bool(val, default=False):
+    if val is None:
+        return default
+    return str(val).strip().lower() in ("true", "1", "yes", "on")
+
+ENABLE_VALKEY_CACHE = _to_bool(
+    os.getenv("ENABLE_VALKEY_CACHE", valkey_conf.get("enabled")),
+    default=False
+)
+VALKEY_URL = os.getenv("VALKEY_URL", valkey_conf.get("url") or "valkey://127.0.0.1:6379/1")
+try:
+    VALKEY_CACHE_TTL = int(os.getenv("VALKEY_CACHE_TTL", valkey_conf.get("default_timeout") or 3600))
+except (ValueError, TypeError):
+    VALKEY_CACHE_TTL = 3600
+VALKEY_PREFIX = os.getenv("VALKEY_PREFIX", valkey_conf.get("prefix") or "politiaware")
+
+if ENABLE_VALKEY_CACHE:
+    CACHES = {
+        "default": {
+            "BACKEND": "politiaware_backend.valkey_cache.ValkeyCache",
+            "LOCATION": VALKEY_URL,
+            "KEY_PREFIX": VALKEY_PREFIX,
+            "TIMEOUT": VALKEY_CACHE_TTL,
+        }
+    }
+
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        }
+    }
+
+
 try :
     from .db_settings import *    
 except ImportError:
     pass
+
+# Observability Configuration & OpenTelemetry Auto-Initialization
+from politiaware_backend.observability import config as obs_config
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "opensearch": {
+            "()": "politiaware_backend.observability.OpenSearchJSONFormatter",
+        },
+        "verbose": {
+            "format": "%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        "opensearch": {
+            "()": "politiaware_backend.observability.OpenSearchHandler",
+            "level": "INFO",
+        },
+    },
+    "root": {
+        "handlers": ["console", "opensearch"] if obs_config.opensearch_logging_enabled else ["console"],
+        "level": "INFO",
+    },
+}
+
+try:
+    from politiaware_backend.observability import init_observability
+    init_observability()
+except Exception as _obs_exc:
+    import logging
+    logging.getLogger("politiaware_backend.observability").warning("Observability initialization deferred: %s", _obs_exc)
+
+
