@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Politiaware"
+version = "1.0.0"
+description = "Politiaware"
+readme = "README.md"
+requires-python = ">=3.14"
+dynamic = ["dependencies"]
+
+#[tool.setuptools.dynamic]
+#dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["politiaware_backend"]
+
+[tool.setuptools.package-data]
+"*" = ["*.html", "*.txt", "*.css", "*.js", "*.json"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["*.pyc", "__pycache__"]

@@ -1,0 +1,56 @@
+[database]
+user = "env:DEV_POSTGRES_USER"
+password = "env:DEV_POSTGRES_PASSWORD"
+host = "env:DEV_POSTGRES_HOST"
+port = "env:DEV_POSTGRES_PORT"
+name = "env:DEV_POSTGRES_DB"
+
+[mega]
+mega_email = "env:MEGA_EMAIL"
+mega_password = "env:MEGA_PASSWORD"
+db_backup_path = "/adhikar/politiaware/db_backups"
+media_backup_path = "/adhikar/politiaware/media_backups"
+
+[cloudinary]
+cloud_name = "env:CLOUDINARY_CLOUD_NAME"
+api_key = "env:CLOUDINARY_API_KEY"
+api_secret = "env:CLOUDINARY_API_SECRET"
+upload_folder = "media/uploads"        # optional: default folder for uploads
+static_transform = "c_fill,w_500,h_500" # optional: default transformation string
+
+[django-static]
+# URL to access static files
+static_url = "/static/"
+# Path to collect static files
+static_root = "staticfiles"
+
+[django-media]
+# URL to access media files
+media_url = "/media/"
+# Local path to store uploaded media files
+media_root = "media"
+
+[django]
+# ALLOWED_HOSTS can be provided via env var ALLOWED_HOSTS (comma-separated)
+# Example: ALLOWED_HOSTS="example.com,.example.org"
+allowed_hosts = "env:ALLOWED_HOSTS"
+
+[valkey]
+enabled = "env:ENABLE_VALKEY_CACHE"
+url = "env:VALKEY_URL"
+default_timeout = "env:VALKEY_CACHE_TTL"
+prefix = "env:VALKEY_PREFIX"
+
+[observability]
+enabled = "env:OTEL_ENABLED"
+service_name = "env:OTEL_SERVICE_NAME"
+jaeger_enabled = "env:JAEGER_ENABLED"
+jaeger_endpoint = "env:JAEGER_ENDPOINT"
+arize_enabled = "env:ARIZE_ENABLED"
+arize_endpoint = "env:ARIZE_ENDPOINT"
+arize_space_id = "env:ARIZE_SPACE_ID"
+arize_api_key = "env:ARIZE_API_KEY"
+sampler = "env:OTEL_TRACES_SAMPLER"
+opensearch_url = "env:OPENSEARCH_URL"
+opensearch_logging_enabled = "env:OPENSEARCH_LOGGING_ENABLED"
+opensearch_index_prefix = "env:OPENSEARCH_INDEX_PREFIX"

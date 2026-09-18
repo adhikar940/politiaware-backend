@@ -1,0 +1,2 @@
+"""Taluk application."""
+

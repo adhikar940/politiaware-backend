@@ -1,0 +1,2 @@
+"""Panchayat application."""
+
